@@ -56,7 +56,6 @@ export const getCourses = async (req, res, next) => {
     next(err);
   }
 };
-
 export const getCourse = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -66,6 +65,40 @@ export const getCourse = async (req, res, next) => {
       throw error;
     }
     res.status(200).json({ success: true, data: course });
+  } catch (err) {
+    next(err);
+  }
+};
+export const updateCourse = async (req, res, next) => {
+  try {
+  } catch (err) {
+    next(err);
+  }
+};
+export const deleteCourse = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error = new Error("Invalid course ID");
+      error.status = 400;
+      throw error;
+    }
+    const deletedCourse = await Course.findByIdAndDelete(id);
+    if (!deletedCourse) {
+      const error = new Error("Course not found");
+      error.status = 404;
+      throw error;
+    }
+    res.status(200).json({
+      success: true,
+      message: "Course deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+export const getUserCourses = async (req, res, next) => {
+  try {
   } catch (err) {
     next(err);
   }
