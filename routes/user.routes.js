@@ -11,6 +11,6 @@ const userRouter = Router();
 userRouter.get("/", adminAuthorize, getUsers);
 userRouter.get("/:id", authorize, getUser);
 userRouter.put("/:id", authorize, updateUser);
-userRouter.delete("/:id", authorize, deleteUser);
+userRouter.delete("/:id", adminAuthorize, deleteUser);
 
 export default userRouter;
