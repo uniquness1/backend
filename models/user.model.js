@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
+    middleName: {
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
+    },
     lastName: {
       type: String,
       required: [true, "Last name is required"],
@@ -60,9 +66,32 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["student", "instructor", "admin"],
+      default: "student",
+    },
+    avatar: {
+      public_id: String,
+      url: String,
+    },
+    middleName: {
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
+    },
+    bio: {
+      type: String,
+      maxlength: 500,
+    },
+    dateOfBirth: Date,
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      country: String,
     },
   },
   { timestamps: true }

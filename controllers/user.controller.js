@@ -35,8 +35,10 @@ export const updateUser = async (req, res, next) => {
       throw error;
     }
     const allowedUpdates = [
-      "firstName",
-      "lastName",
+      "dateOfBirth",
+      "address",
+      "bio",
+      "middleName",
       // Add other fields here that you want to allow updates for later
     ];
 
