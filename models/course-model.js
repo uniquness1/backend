@@ -19,12 +19,12 @@ const courseSchema = new mongoose.Schema(
     },
     instructor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: "User",
       required: [true, "Instructor is required"],
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "category",
+      ref: "Category",
       required: [true, "Category is required"],
     },
     level: {
@@ -68,7 +68,7 @@ const courseSchema = new mongoose.Schema(
     enrolledStudents: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: "User",
       },
     ],
     totalLectures: {

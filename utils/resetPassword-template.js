@@ -136,9 +136,9 @@ export const generateEmailTemplate = {
             </div>
             
             <div class="footer">
-                <p><strong>Express APP</strong></p>
+                <p><strong>Pixelanchor</strong></p>
                 <p>This is an automated message, please do not reply to this email.</p>
-                <p>&copy; ${new Date().getFullYear()} Express APP. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Pixelanchor. All rights reserved.</p>
             </div>
         </div>
     </body>
