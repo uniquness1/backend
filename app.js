@@ -13,11 +13,16 @@ import onboardingRouter from "./routes/onboarding.routes.js";
 import arcjetMiddleware from "./middlewares/arcjet.middleware.js";
 
 const app = express();
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://pixelanchor.vercel.app/",
+];
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
