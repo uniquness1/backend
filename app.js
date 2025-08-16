@@ -16,7 +16,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://pixelanchor.vercel.app/",
+  "https://pixelanchor.vercel.app",
 ];
 app.use(
   cors({
