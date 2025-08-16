@@ -20,12 +20,12 @@ const courseSchema = new mongoose.Schema(
     instructor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      // required: [true, "Instructor is required"],
+      required: [true, "Instructor is required"],
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "category",
-      // required: [true, "Category is required"],
+      required: [true, "Category is required"],
     },
     level: {
       type: String,
@@ -63,7 +63,7 @@ const courseSchema = new mongoose.Schema(
     },
     maxStudents: {
       type: Number,
-      default: 0, // 0 means unlimited
+      default: 0,
     },
     enrolledStudents: [
       {

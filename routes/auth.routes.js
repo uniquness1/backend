@@ -9,7 +9,9 @@ import {
   refreshToken,
   verifyEmail,
   resendVerificationEmail,
+  changePassword,
 } from "../controllers/auth.controller.js";
+import authorize from "../middlewares/auth.middleware.js";
 
 const authRouter = Router();
 
@@ -18,7 +20,7 @@ authRouter.post("/sign-in", signIn);
 authRouter.post("/sign-out", signOut);
 authRouter.post("/reset-password", resetPassword);
 authRouter.get("/verify-reset-token/:token", verifyResetToken);
-authRouter.post("/update-password", updatePassword);
+authRouter.put("/update-password", authorize, changePassword);
 authRouter.post("/refresh-token", refreshToken);
 authRouter.get("/verify-email/:token", verifyEmail);
 authRouter.post("/resend-verification", resendVerificationEmail);

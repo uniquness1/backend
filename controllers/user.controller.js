@@ -23,6 +23,14 @@ export const getUser = async (req, res, next) => {
     next(error);
   }
 };
+export const getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password").lean();
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 export const updateUser = async (req, res, next) => {
   try {
@@ -35,11 +43,13 @@ export const updateUser = async (req, res, next) => {
       throw error;
     }
     const allowedUpdates = [
-      "dateOfBirth",
-      "address",
+      "website",
+      "facebook_url",
       "bio",
-      "middleName",
-      // Add other fields here that you want to allow updates for later
+      "twitter_url",
+      "youtube_url",
+      "linkedin_url",
+      "github_url",
     ];
 
     const filteredUpdates = {};
@@ -54,28 +64,7 @@ export const updateUser = async (req, res, next) => {
       error.status = 400;
       throw error;
     }
-
-    if (
-      filteredUpdates.firstName &&
-      (filteredUpdates.firstName.trim().length < 2 ||
-        filteredUpdates.firstName.trim().length > 50)
-    ) {
-      const error = new Error("First name must be between 2 and 50 characters");
-      error.status = 400;
-      throw error;
-    }
-
-    if (
-      filteredUpdates.lastName &&
-      (filteredUpdates.lastName.trim().length < 2 ||
-        filteredUpdates.lastName.trim().length > 50)
-    ) {
-      const error = new Error("Last name must be between 2 and 50 characters");
-      error.status = 400;
-      throw error;
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(id, updates, {
+    const updatedUser = await User.findByIdAndUpdate(id, filteredUpdates, {
       new: true,
       runValidators: true,
     }).select("-password");

@@ -9,12 +9,6 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
-    middleName: {
-      type: String,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
-    },
     lastName: {
       type: String,
       required: [true, "Last name is required"],
@@ -29,13 +23,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-    },
-    phoneNumber: {
-      type: String,
-      required: [true, "phone number is required"],
-      match: [/^\+?[0-9]{7,15}$/, "Please provide a valid phone number"],
-      unique: true,
-      trim: true,
     },
     password: {
       type: String,
@@ -58,6 +45,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
+    },
     emailVerificationToken: {
       type: String,
       select: false,
@@ -71,28 +62,29 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "instructor", "admin"],
       default: "student",
     },
+    // Onboarding fields
+    fieldOfStudy: {
+      type: String,
+      trim: true,
+    },
+    reasonForJoining: {
+      type: String,
+      trim: true,
+    },
     avatar: {
       public_id: String,
       url: String,
-    },
-    middleName: {
-      type: String,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
     },
     bio: {
       type: String,
       maxlength: 500,
     },
-    dateOfBirth: Date,
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
-    },
+    website: String,
+    twitter_url: String,
+    facebook_url: String,
+    linkedin_url: String,
+    youtube_url: String,
+    github_url: String,
   },
   { timestamps: true }
 );

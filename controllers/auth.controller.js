@@ -30,20 +30,12 @@ export const signUp = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { firstName, lastName, email, password, phoneNumber } = req.body;
-    const existingUserByEmail = await User.findOne({ email });
-    const existingUserByPhone = await User.findOne({ phoneNumber });
-
+    const { firstName, lastName, email, password, role } = req.body;
+    const existingUserByEmail = await User.findOne({ email }).session(session);
     if (existingUserByEmail) {
       const error = new Error("User with this email already exists");
       error.statusCode = 409;
-      throw error;
-    }
-
-    if (existingUserByPhone) {
-      const error = new Error("Phone Number registered already");
-      error.statusCode = 409;
-      throw error;
+      return next(error);
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -59,9 +51,9 @@ export const signUp = async (req, res, next) => {
         {
           firstName,
           lastName,
-          phoneNumber,
           email,
           password: hashedPassword,
+          role: role || "student",
           emailVerificationToken: hashedVerificationToken,
           emailVerificationExpires: verificationTokenExpiry,
         },
@@ -71,7 +63,7 @@ export const signUp = async (req, res, next) => {
 
     await session.commitTransaction();
     session.endSession();
-    const verificationURL = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verificationURL = `${FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
     await sendVerificationEmail({
       email: newUser[0].email,
       firstName: newUser[0].firstName,
@@ -90,10 +82,12 @@ export const signUp = async (req, res, next) => {
           email: newUser[0].email,
           phoneNumber: newUser[0].phoneNumber,
           isVerified: newUser[0].isVerified,
+          isOnboarded: newUser[0].isOnboarded,
         },
       },
     });
   } catch (error) {
+    console.log(error);
     await session.abortTransaction();
     session.endSession();
     next(error);
@@ -108,17 +102,16 @@ export const signIn = async (req, res, next) => {
     if (!user) {
       const error = new Error("User not found");
       error.statusCode = 404;
-      throw error;
+      return next(error);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       const error = new Error("Invalid Password");
       error.statusCode = 401;
-      throw error;
+      return next(error);
     }
 
-    // Check if email is verified
     if (!user.isVerified) {
       const error = new Error(
         "Please verify your email address before signing in. Check your email for verification link."
@@ -126,7 +119,7 @@ export const signIn = async (req, res, next) => {
       error.statusCode = 403;
       error.needsVerification = true;
       error.userId = user._id;
-      throw error;
+      return next(error);
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -146,6 +139,8 @@ export const signIn = async (req, res, next) => {
           email: user.email,
           phoneNumber: user.phoneNumber,
           isVerified: user.isVerified,
+          isOnboarded: user.isOnboarded,
+          role: user.role,
         },
       },
     });
@@ -160,7 +155,7 @@ export const verifyEmail = async (req, res, next) => {
     if (!token) {
       const error = new Error("Verification token is required");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
@@ -171,7 +166,7 @@ export const verifyEmail = async (req, res, next) => {
     if (!user) {
       const error = new Error("Invalid or expired verification token");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     user.isVerified = true;
     user.emailVerificationToken = undefined;
@@ -203,18 +198,18 @@ export const resendVerificationEmail = async (req, res, next) => {
     if (!email) {
       const error = new Error("Email is required");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const user = await User.findOne({ email });
     if (!user) {
       const error = new Error("User not found");
       error.statusCode = 404;
-      throw error;
+      return next(error);
     }
     if (user.isVerified) {
       const error = new Error("Email is already verified");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -226,7 +221,7 @@ export const resendVerificationEmail = async (req, res, next) => {
     user.emailVerificationToken = hashedVerificationToken;
     user.emailVerificationExpires = verificationTokenExpiry;
     await user.save();
-    const verificationURL = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verificationURL = `${FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
     await sendVerificationEmail({
       email: user.email,
       firstName: user.firstName,
@@ -248,13 +243,13 @@ export const resetPassword = async (req, res, next) => {
     if (!email) {
       const error = new Error("Email is required");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const user = await User.findOne({ email });
     if (!user) {
       const error = new Error("User not found");
       error.statusCode = 404;
-      throw error;
+      return next(error);
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
@@ -265,7 +260,7 @@ export const resetPassword = async (req, res, next) => {
     user.passwordResetToken = hashedResetToken;
     user.passwordResetExpires = resetTokenExpiry;
     await user.save();
-    const resetURL = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetURL = `${FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
     await sendPasswordResetEmail({
       email: user.email,
       firstName: user.firstName,
@@ -286,7 +281,7 @@ export const verifyResetToken = async (req, res, next) => {
     if (!token) {
       const error = new Error("Reset token is required");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     // Hash the provided token to compare with stored hash
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -297,7 +292,7 @@ export const verifyResetToken = async (req, res, next) => {
     if (!user) {
       const error = new Error("Invalid or expired reset token");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     res.status(200).json({
       success: true,
@@ -320,19 +315,19 @@ export const updatePassword = async (req, res, next) => {
         "Token, new password, and confirm password are required"
       );
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
 
     if (newPassword !== confirmPassword) {
       const error = new Error("Passwords do not match");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
 
     if (newPassword.length < 6) {
       const error = new Error("Password must be at least 6 characters long");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
@@ -344,7 +339,7 @@ export const updatePassword = async (req, res, next) => {
     if (!user) {
       const error = new Error("Invalid or expired reset token");
       error.statusCode = 400;
-      throw error;
+      return next(error);
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -364,6 +359,54 @@ export const updatePassword = async (req, res, next) => {
   }
 };
 
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      const error = new Error(
+        "Current password, new password, and confirm password are required"
+      );
+      error.statusCode = 400;
+      return next(error);
+    }
+    if (newPassword !== confirmPassword) {
+      const error = new Error("Passwords do not match");
+      error.statusCode = 400;
+      return next(error);
+    }
+    if (newPassword.length < 8) {
+      const error = new Error(
+        "New password must be at least 8 characters long"
+      );
+      error.statusCode = 400;
+      return next(error);
+    }
+    const user = await User.findById(req.user.id).select("+password");
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      const error = new Error("Current password is incorrect");
+      error.statusCode = 400;
+      return next(error);
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.refreshToken = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -371,7 +414,7 @@ export const refreshToken = async (req, res, next) => {
     if (!refreshToken) {
       const error = new Error("Refresh token is required");
       error.statusCode = 401;
-      throw error;
+      return next(error);
     }
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
     const user = await User.findOne({ _id: decoded.userId }).select(
@@ -381,7 +424,7 @@ export const refreshToken = async (req, res, next) => {
     if (!user || user.refreshToken !== refreshToken) {
       const error = new Error("Invalid refresh token");
       error.statusCode = 401;
-      throw error;
+      return next(error);
     }
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(

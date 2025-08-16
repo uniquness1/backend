@@ -16,6 +16,10 @@ const aj = arcjet({
         "*Postman*", // More flexible Postman matching
       ],
     }),
+    // detectBot({
+    //   mode: "LIVE",
+    //   allow: ["CATEGORY:SEARCH_ENGINE"],
+    // }),
     tokenBucket({
       mode: "LIVE",
       refillRate: 5,

@@ -172,7 +172,7 @@ export const generateEmailTemplate = {
                 box-shadow: 0 0 20px rgba(0,0,0,0.1);
             }
             .header {
-                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                background: linear-gradient(135deg, #2176FF 0%, #2176FF 100%);
                 color: white;
                 padding: 30px;
                 text-align: center;
@@ -197,8 +197,8 @@ export const generateEmailTemplate = {
             }
             .verify-button {
                 display: inline-block;
-                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-                color: white;
+                background: linear-gradient(135deg, #2176FF 0%, #2176FF 100%);
+                color: white !important;
                 padding: 15px 30px;
                 text-decoration: none;
                 border-radius: 5px;
@@ -217,7 +217,7 @@ export const generateEmailTemplate = {
                 padding: 15px;
                 margin: 20px 0;
                 font-size: 14px;
-                color: #0056b3;
+                color: #2176FF;
             }
             .footer {
                 background-color: #f8f9fa;
@@ -249,7 +249,7 @@ export const generateEmailTemplate = {
         <div class="container">
             <div class="header">
                 <div class="icon">✉️</div>
-                <h1>Welcome to Express APP!</h1>
+                <h1>Welcome to Pixelanchor</h1>
             </div>
             
             <div class="content">
@@ -258,7 +258,7 @@ export const generateEmailTemplate = {
                 </div>
                 
                 <div class="message">
-                    Thank you for signing up with Express APP! To complete your registration and start using your account, please verify your email address by clicking the button below.
+                    Thank you for signing up with Pixelanchor! To complete your registration and start using your account, please verify your email address by clicking the button below.
                 </div>
                 
                 <div style="text-align: center;">
@@ -266,7 +266,7 @@ export const generateEmailTemplate = {
                 </div>
                 
                 <div class="security-notice">
-                    <strong>📧 Important:</strong> This verification link will expire in 24 hours. If you didn't create an account with us, you can safely ignore this email.
+                    <strong>📧 Important:</strong> This verification link will expire in 15 minutes. If you didn't create an account with us, you can safely ignore this email.
                 </div>
                 
                 <div class="message">
@@ -283,9 +283,9 @@ export const generateEmailTemplate = {
             </div>
             
             <div class="footer">
-                <p><strong>Express APP</strong></p>
+                <p><strong>Pixelanchor</strong></p>
                 <p>This is an automated message, please do not reply to this email.</p>
-                <p>&copy; ${new Date().getFullYear()} Express APP. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Pixelanchor. All rights reserved.</p>
             </div>
         </div>
     </body>
